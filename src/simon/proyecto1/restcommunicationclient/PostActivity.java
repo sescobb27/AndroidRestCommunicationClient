@@ -2,6 +2,7 @@ package simon.proyecto1.restcommunicationclient;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -11,10 +12,12 @@ import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
 public class PostActivity extends Activity implements View.OnClickListener, ServiceSuscriptor{
 
@@ -23,6 +26,7 @@ public class PostActivity extends Activity implements View.OnClickListener, Serv
     private RatingBar post_rating;
     private Map<String, String> params;
     private JSONArray response;
+    private TreeSet<Post>      posts;
 
     private ConnectionDetector internet_detector;
     private ServiceConnection serviceConnection;
@@ -39,6 +43,11 @@ public class PostActivity extends Activity implements View.OnClickListener, Serv
             Toast.makeText( this, "Please connect to working Internet connection", Toast.LENGTH_LONG  ).show();
             return;
         }
+        if(getIntent() != null)
+        {
+	        Bundle extras = getIntent().getExtras();
+	        posts = (TreeSet<Post>) extras.get("posts");
+        }
         crear = (Button) findViewById( R.id.btn_crear );
         txt_content = (EditText) findViewById( R.id.txt_content );
         txt_title = (EditText) findViewById( R.id.txt_title );
@@ -46,6 +55,7 @@ public class PostActivity extends Activity implements View.OnClickListener, Serv
         post_rating = (RatingBar) findViewById( R.id.post_rating );
         crear.setOnClickListener( this );
         serviceConnection = ServiceConnection.getServiceConnection();
+        serviceConnection.suscribe(this);
     }
 
     private void sendParams()
@@ -90,6 +100,18 @@ public class PostActivity extends Activity implements View.OnClickListener, Serv
 
 	@Override
 	public void responseObtained(JSONArray response) throws Exception {
-		this.response =  response;  		
+		//don't apply
+	}
+	
+	@Override
+	public void responseObtained(JSONObject response) throws Exception {
+		Post post = new Post(
+				response.getInt("id"),
+				response.getInt("rating"),
+				response.getString("author"),
+				response.getString("content"),
+				response.getString("title")
+		);
+		posts.add( post );
 	}
 }

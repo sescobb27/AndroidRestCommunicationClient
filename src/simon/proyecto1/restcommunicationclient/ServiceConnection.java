@@ -76,7 +76,10 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
     {
     	for (ServiceSuscriptor suscriptor : suscriptors)
     	{
-    		suscriptor.responseObtained(response);
+    		if(ACTION == INDEX)
+    			suscriptor.responseObtained(response);
+    		else
+    			suscriptor.responseObtained(response.getJSONObject(0));
     	}
     }
 
@@ -152,8 +155,10 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
         }
         else
         {
-	        int status = conn_to_server.getResponseCode();
-	        if (status != 200) {
+        	response = new JSONArray(  );
+        	response.put( (JSONObject) conn_to_server.getContent() );
+        	int status = conn_to_server.getResponseCode();
+	        if ( status != 200) {
 	            throw new IOException("Request failed with error code " + status);
 	        }
         }
@@ -162,7 +167,7 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
 
     private void send() throws Exception
     {
-        DataOutputStream printout = new DataOutputStream(conn_to_server.getOutputStream());
+        DataOutputStream printout = new DataOutputStream( conn_to_server.getOutputStream() );
         if ( ACTION == CREATE )
         {
             String request_body = params.toString();

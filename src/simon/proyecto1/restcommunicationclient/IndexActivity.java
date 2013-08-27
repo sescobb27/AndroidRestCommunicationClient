@@ -2,6 +2,7 @@ package simon.proyecto1.restcommunicationclient;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -75,13 +76,25 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
             }
             else if( ex instanceof IllegalArgumentException )
             {
-
+            	
             }
         }
     }
 
     private void startPostActivity() {
-
+    	Intent new_post_intent = new Intent(getApplicationContext(), PostActivity.class);
+    	new_post_intent.putExtra("posts", posts);
+    	startActivityForResult(new_post_intent, RESULT_OK);
+    	serviceConnection.unsuscribe(this);
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	if(resultCode == RESULT_OK)
+    	{
+    		
+    	}
+    	super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void getIndexAction() throws Exception {
@@ -103,5 +116,10 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
             );
             posts.add( post );
         }
+	}
+	@Override
+	public void responseObtained(JSONObject response) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 }
