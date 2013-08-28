@@ -84,8 +84,8 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
     private void startPostActivity() {
     	Intent new_post_intent = new Intent(getApplicationContext(), PostActivity.class);
     	new_post_intent.putExtra("posts", posts);
-    	startActivityForResult(new_post_intent, RESULT_OK);
     	serviceConnection.unsuscribe(this);
+    	startActivityForResult(new_post_intent, RESULT_OK);
     }
     
     @Override
@@ -95,6 +95,11 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
     		
     	}
     	super.onActivityResult(requestCode, resultCode, data);
+    }
+    
+    @Override
+    public void onBackPressed() {
+    	this.finish();
     }
 
     private void getIndexAction() throws Exception {

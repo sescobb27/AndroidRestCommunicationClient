@@ -5,19 +5,24 @@ package simon.proyecto1.restcommunicationclient;
  */
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.HttpURLConnection;
 import java.io.DataOutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -28,6 +33,7 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
     private final String CREATE_URL  = "/posts.json";
     private final String DESTROY_URL = "/posts/:id.json";
     private final String SERVER_URL  = "http://192.168.1.2";
+    //private final String SERVER_URL  = "http://10.0.44.84";
     private final String PORT = ":3000";
     private       StringBuilder REQUEST_URL;
 
@@ -40,11 +46,14 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
     private             int ACTION  = 1;
     private JSONObject params;
     private JSONArray response;
-    private URL URL;
-    private HttpURLConnection conn_to_server;
     private LinkedList<ServiceSuscriptor> suscriptors;
+    
     private HttpGet get;
+    private HttpPost post;
+    private HttpPut update;
+    private HttpDelete delete;
     private HttpClient client;
+    private HttpResponse client_response;
 
     private ServiceConnection() {
     	client = new DefaultHttpClient();
@@ -83,7 +92,7 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
     	}
     }
 
-    public void setURL( int url )
+    public void setURL( int url ) throws Exception
     {
         ACTION = url;
         if ( REQUEST_URL == null || !REQUEST_URL.toString().equals( SERVER_URL + PORT) )
@@ -105,8 +114,7 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
                 REQUEST_URL.append( DESTROY_URL );
                 break;
             default:
-                REQUEST_URL.append( INDEX_URL );
-                ACTION = 1;
+            	throw new IllegalStateException("Invalid Action, only GET, PUT, POST, DELETE, and you send "+ACTION);
         }
     }
 
@@ -125,107 +133,100 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
         switch ( ACTION )
         {
             case INDEX:
-                getIndex();
+            	get = new HttpGet(REQUEST_URL.toString());
                 break;
             case CREATE:
-                postCreate();
+            	//post = new HttpPost(REQUEST_URL.toString());
                 break;
             case UPDATE:
-                putUpdate();
+                update = new HttpPut(REQUEST_URL.toString());
                 break;
             case DESTROY:
-                postDestroy();
+            	delete = new HttpDelete(REQUEST_URL.toString());
                 break;
             default:
-                getIndex();
+                throw new IllegalStateException("Invalid Action, only GET, PUT, POST, DELETE, and you send "+ACTION);
         }
         if ( ACTION == CREATE )
             params = new JSONObject(req_params);
         service.execute();
     }
 
-    private void getResponse(  ) throws Exception
+    private void executeAndGetResponse(  ) throws Exception
     {
+    	String resp;
+    	switch ( ACTION )
+        {
+            case INDEX:
+            	get.setHeader("content-type", "application/json");
+            	client_response = client.execute(get);
+                break;
+            case CREATE:
+                /*StringEntity request_body = new StringEntity( params.toString() );
+                post.setHeader("Accept", "application/json");
+                post.setHeader(HTTP.CONTENT_TYPE, "application/json");
+                post.setEntity(request_body);
+            	client_response = client.execute( post );*/
+            	doPost();
+            	return;
+            case UPDATE:
+            	client_response = client.execute( update );
+                break;
+            case DESTROY:
+            	client_response = client.execute( delete );
+                break;
+        }
+    	resp = EntityUtils.toString(client_response.getEntity());
+    	JSONObject temp = new JSONObject(resp);
         if ( ACTION == INDEX )
         {
-        	HttpResponse client_response = client.execute(get);
-        	String resp = EntityUtils.toString(client_response.getEntity());
-        	JSONObject temp = new JSONObject(resp);
             response = new JSONArray( temp.getString("posts") );
         }
         else
         {
         	response = new JSONArray(  );
-        	response.put( (JSONObject) conn_to_server.getContent() );
-        	int status = conn_to_server.getResponseCode();
-	        if ( status != 200) {
-	            throw new IOException("Request failed with error code " + status);
-	        }
+        	response.put( temp );
         }
     }
 
-
-    private void send() throws Exception
-    {
-        DataOutputStream printout = new DataOutputStream( conn_to_server.getOutputStream() );
-        if ( ACTION == CREATE )
-        {
-            String request_body = params.toString();
-            printout.writeBytes(request_body);
-        }
-        printout.flush ();
-        printout.close ();
-    }
-
-    private void tryURL(String requestMethod) throws Exception
-    {
-        try {
-            URL = new URL(REQUEST_URL.toString());
-            resetConnectionToService(requestMethod);
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("invalid url: " + REQUEST_URL.toString());
-        }
-    }
-
-    private void resetConnectionToService(String requestMethod) throws Exception
-    {
-        conn_to_server = null;
-        conn_to_server = (HttpURLConnection) URL.openConnection();
-        conn_to_server.setDoOutput(true);
-        conn_to_server.setUseCaches(false);
-        conn_to_server.setRequestMethod(requestMethod);
-        conn_to_server.setRequestProperty("Content-Type", "application/json");
-    }
-
-    private void getIndex() throws Exception
-    {
-    	get = new HttpGet(REQUEST_URL.toString());
-    	get.setHeader("content-type", "application/json");
-    }
-
-    private void postCreate() throws Exception
-    {
-        tryURL("POST");
-    }
-
-    private void putUpdate() throws Exception
-    {
-        tryURL("UPDATE");
-    }
-
-    private void postDestroy() throws Exception
-    {
-        tryURL("DELETE");
-    }
+	private void doPost() throws Exception {
+		HttpURLConnection conn_to_server = null;
+		try{
+			URL url;
+			url = new URL(REQUEST_URL.toString());
+			conn_to_server = (HttpURLConnection) url.openConnection();
+			conn_to_server.setDoOutput(true);
+			conn_to_server.setUseCaches(false);
+			conn_to_server.setRequestMethod("POST");
+			conn_to_server.setRequestProperty("Content-Type", "application/json");
+			DataOutputStream printout =
+    				new DataOutputStream(conn_to_server.getOutputStream());
+			// convert the json message to be send into string
+			String body = params.toString();
+			// write into the output stream the message to be send
+			printout.writeBytes(body);
+			// send the request
+			printout.flush ();
+			// close the output stream
+			printout.close ();
+			// handle the response
+			int status = conn_to_server.getResponseCode();
+			if (status != 200) {	 
+				 throw new Exception("Post failed with error code " + status);
+			}
+			response = new JSONArray(  );
+        	response.put( conn_to_server.getContent() );
+    	}finally{
+    		if (conn_to_server != null) {
+    			conn_to_server.disconnect();
+            }
+    	}
+	}
 
 	@Override
 	protected Long doInBackground(Void... params) {
 		try {
-			if(ACTION != INDEX)
-				send(  );
-			getResponse(  );
-			if ( conn_to_server != null )
-	            conn_to_server.disconnect();
+			executeAndGetResponse();
 			notifySuscriptors();
 		} catch (Exception e) {
 			e.printStackTrace();

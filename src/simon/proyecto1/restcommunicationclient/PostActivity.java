@@ -24,7 +24,7 @@ public class PostActivity extends Activity implements View.OnClickListener, Serv
     private Button crear;
     private EditText txt_title, txt_content, txt_author;
     private RatingBar post_rating;
-    private Map<String, String> params;
+    private Map<String, String> params, post;
     private JSONArray response;
     private TreeSet<Post>      posts;
 
@@ -61,14 +61,15 @@ public class PostActivity extends Activity implements View.OnClickListener, Serv
     private void sendParams()
     {
         try {
-            params = new HashMap<String, String>(  );
-            params.put( "title", txt_title.getText().toString() );
-            params.put( "content", txt_content.getText().toString() );
-            params.put( "rating", String.valueOf( post_rating.getRating() ) );
-            params.put( "author", txt_author.getText().toString() );
+            post = new HashMap<String, String>(  );
+            post.put( "title", txt_title.getText().toString() );
+            post.put( "content", txt_content.getText().toString() );
+            post.put( "rating", String.valueOf( post_rating.getRating() ) );
+            post.put( "author", txt_author.getText().toString() );
             serviceConnection.setURL( ServiceConnection.CREATE );
-            params.put( "post", params.toString() );
-            serviceConnection.sendRequest( params );
+            params = new HashMap<String, String>(  );
+            params.put("post", post.toString());
+            serviceConnection.sendRequest( post );
         }catch ( Exception ex ) {
             if ( ex instanceof IOException )
             {
