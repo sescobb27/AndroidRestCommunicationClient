@@ -9,24 +9,22 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
+public class ServiceConnection/* extends AsyncTask<Void, Integer, Long>*/{
 
     private final String INDEX_URL   = "/posts.json";
     private final String UPDATE_URL  = "/post/:id.json";
@@ -49,7 +47,7 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
     private LinkedList<ServiceSuscriptor> suscriptors;
     
     private HttpGet get;
-    private HttpPost post;
+    // private HttpPost post;
     private HttpPut update;
     private HttpDelete delete;
     private HttpClient client;
@@ -149,7 +147,9 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
         }
         if ( ACTION == CREATE )
             params = new JSONObject(req_params);
-        service.execute();
+        // service.execute();
+        AsyncTaskRunnable async_task = new AsyncTaskRunnable();
+        async_task.execute();
     }
 
     private void executeAndGetResponse(  ) throws Exception
@@ -211,11 +211,14 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
 			printout.close ();
 			// handle the response
 			int status = conn_to_server.getResponseCode();
-			if (status != 200) {	 
+			if (status >= 400) {	 
 				 throw new Exception("Post failed with error code " + status);
 			}
+			BufferedReader response_reader = new BufferedReader(new InputStreamReader(conn_to_server.getInputStream()));
+			StringBuilder response_parser = new StringBuilder();
+			response_parser.append( response_reader.readLine() );
 			response = new JSONArray(  );
-        	response.put( conn_to_server.getContent() );
+        	response.put( new JSONObject( response_parser.toString() ).getJSONObject("post") );
     	}finally{
     		if (conn_to_server != null) {
     			conn_to_server.disconnect();
@@ -223,7 +226,7 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
     	}
 	}
 
-	@Override
+	/*@Override
 	protected Long doInBackground(Void... params) {
 		try {
 			executeAndGetResponse();
@@ -232,5 +235,20 @@ public class ServiceConnection extends AsyncTask<Void, Integer, Long>{
 			e.printStackTrace();
 		}
 		return null;
+	}*/
+	
+	private class AsyncTaskRunnable extends AsyncTask<Void, Integer, Long> {
+
+		@Override
+		protected Long doInBackground(Void... params) {
+			try {
+				executeAndGetResponse();
+				notifySuscriptors();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
 	}
 }

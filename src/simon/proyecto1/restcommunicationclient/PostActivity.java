@@ -11,13 +11,10 @@ import android.widget.RatingBar;
 import android.widget.Toast;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
 
 public class PostActivity extends Activity implements View.OnClickListener, ServiceSuscriptor{
 
@@ -25,8 +22,6 @@ public class PostActivity extends Activity implements View.OnClickListener, Serv
     private EditText txt_title, txt_content, txt_author;
     private RatingBar post_rating;
     private Map<String, String> params, post;
-    private JSONArray response;
-    private TreeSet<Post>      posts;
 
     private ConnectionDetector internet_detector;
     private ServiceConnection serviceConnection;
@@ -42,11 +37,6 @@ public class PostActivity extends Activity implements View.OnClickListener, Serv
             Log.e( "Connexion", "Please connect to working Internet connection" );
             Toast.makeText( this, "Please connect to working Internet connection", Toast.LENGTH_LONG  ).show();
             return;
-        }
-        if(getIntent() != null)
-        {
-	        Bundle extras = getIntent().getExtras();
-	        posts = (TreeSet<Post>) extras.get("posts");
         }
         crear = (Button) findViewById( R.id.btn_crear );
         txt_content = (EditText) findViewById( R.id.txt_content );
@@ -71,22 +61,7 @@ public class PostActivity extends Activity implements View.OnClickListener, Serv
             params.put("post", post.toString());
             serviceConnection.sendRequest( post );
         }catch ( Exception ex ) {
-            if ( ex instanceof IOException )
-            {
-
-            }
-            else if ( ex instanceof NullPointerException )
-            {
-
-            }
-            else if ( ex instanceof JSONException )
-            {
-
-            }
-            else if( ex instanceof IllegalArgumentException )
-            {
-
-            }
+            ex.printStackTrace();
         }
     }
     @Override
@@ -113,6 +88,11 @@ public class PostActivity extends Activity implements View.OnClickListener, Serv
 				response.getString("content"),
 				response.getString("title")
 		);
-		posts.add( post );
+		Intent intent = new Intent();
+		intent.putExtra("post", post);
+		serviceConnection.unsuscribe(this);
+		setResult(RESULT_OK, intent);
+		// this.finishActivity(RESULT_OK);
+		this.finish();
 	}
 }

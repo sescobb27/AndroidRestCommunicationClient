@@ -6,5 +6,9 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="new_post">New Post</string>
+    <string name="post_author">Post Author</string>
+    <string name="post_title">Post Title</string>
+    <string name="post_id">Post Id</string>
+    <string name="post_content">Post Content</string>
 
 </resources>

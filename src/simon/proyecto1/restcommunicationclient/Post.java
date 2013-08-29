@@ -1,10 +1,16 @@
 package simon.proyecto1.restcommunicationclient;
 
+import java.io.Serializable;
+
 /**
  * Created by simon on 8/26/13.
  */
-public class Post implements Comparable<Post>{
-    private int rating;
+public class Post implements Comparable<Post>, Serializable{
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -9181705812125433738L;
+	private int rating;
     private String author;
     private String content;
     private String title;
@@ -61,5 +67,10 @@ public class Post implements Comparable<Post>{
 	@Override
 	public int compareTo(Post another) {
 		return this.id.compareTo(another.id);
+	}
+	
+	@Override
+	public String toString() {
+		 return String.format("Post: %s\n Author: %s\n Content: %s", this.title, this.author, this.content);
 	}
 }

@@ -3,18 +3,18 @@ package simon.proyecto1.restcommunicationclient;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.TreeSet;
 
 public class IndexActivity extends Activity implements View.OnClickListener, ServiceSuscriptor{
@@ -27,6 +27,7 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
     private Button             btn_index, btn_new;
     private TableLayout        post_table;
     private TableRow           tableRow;
+    private TextView id, title;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -62,49 +63,67 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
                     break;
             }
         }catch ( Exception ex ){
-            if ( ex instanceof IOException )
-            {
-
-            }
-            else if ( ex instanceof NullPointerException )
-            {
-
-            }
-            else if ( ex instanceof JSONException )
-            {
-
-            }
-            else if( ex instanceof IllegalArgumentException )
-            {
-            	
-            }
+        	ex.printStackTrace();
         }
     }
 
     private void startPostActivity() {
     	Intent new_post_intent = new Intent(getApplicationContext(), PostActivity.class);
-    	new_post_intent.putExtra("posts", posts);
     	serviceConnection.unsuscribe(this);
     	startActivityForResult(new_post_intent, RESULT_OK);
     }
     
+    private void createRow(final Post post)
+    {
+    	this.runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				tableRow = new TableRow(getApplicationContext());
+		        
+		        id = new TextView(getApplicationContext());
+		        id.setText(post.getId().toString());
+		        id.setTextColor(Color.RED);
+		        id.setTextSize(30.0f);
+		        id.setFocusable(true);
+		        
+		        title = new TextView(getApplicationContext());
+		        title.setText(post.getTitle());
+		        title.setTextColor(Color.BLACK);
+		        title.setFocusable(true);
+		        title.setTextSize(30.0f);
+		        
+		        tableRow.addView(id);
+		        tableRow.addView(title);
+		        
+		        tableRow.setOnClickListener(new DinamicListener(post, getApplicationContext()));
+		        
+		        post_table.addView(tableRow);
+			}
+		});
+    }
+    
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
     	if(resultCode == RESULT_OK)
     	{
-    		
+    		Post new_post = ( Post ) data.getSerializableExtra( "post" );
+    		posts.add( new_post );
+    		createRow(new_post);
+    		serviceConnection.suscribe(this);
     	}
-    	super.onActivityResult(requestCode, resultCode, data);
     }
     
     @Override
     public void onBackPressed() {
+    	super.onBackPressed();
     	this.finish();
     }
-
+    
     private void getIndexAction() throws Exception {
         serviceConnection.setURL( ServiceConnection.INDEX );
         serviceConnection.sendRequest( null );
+        btn_index.setClickable(false);
     }
 
 	@Override
@@ -119,12 +138,16 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
                     json_post.getString( "content" ),
                     json_post.getString( "title" )
             );
-            posts.add( post );
+            if(! posts.contains(post))
+            {
+            	posts.add( post );
+            	createRow(post);
+            }
         }
 	}
 	@Override
 	public void responseObtained(JSONObject response) throws Exception {
-		// TODO Auto-generated method stub
+		// don't apply
 		
 	}
 }
