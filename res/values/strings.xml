@@ -10,5 +10,6 @@
     <string name="post_title">Post Title</string>
     <string name="post_id">Post Id</string>
     <string name="post_content">Post Content</string>
+    <string name="get_all_post">Get All Post</string>
 
 </resources>

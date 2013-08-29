@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
 
     private Button             btn_index, btn_new;
     private TableLayout        post_table;
+    // private ScrollView scroller;
     private TableRow           tableRow;
     private TextView id, title;
 
@@ -47,6 +49,7 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
         btn_new = (Button) findViewById( R.id.btn_new );
         btn_new.setOnClickListener( this );
         post_table = (TableLayout) findViewById( R.id.post_table );
+        // scroller = (ScrollView) findViewById(R.id.scroll);
         posts = new TreeSet<Post>(  );
     }
 
@@ -70,7 +73,7 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
     private void startPostActivity() {
     	Intent new_post_intent = new Intent(getApplicationContext(), PostActivity.class);
     	serviceConnection.unsuscribe(this);
-    	startActivityForResult(new_post_intent, RESULT_OK);
+    	startActivityForResult(new_post_intent, 0);
     }
     
     private void createRow(final Post post)
@@ -105,6 +108,13 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
     
     @Override
     protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
+    	if(requestCode == RESULT_OK)
+    	{
+    		Post new_post = ( Post ) data.getSerializableExtra( "post" );
+    		posts.add( new_post );
+    		createRow(new_post);
+    		serviceConnection.suscribe(this);
+    	}
     	if(resultCode == RESULT_OK)
     	{
     		Post new_post = ( Post ) data.getSerializableExtra( "post" );

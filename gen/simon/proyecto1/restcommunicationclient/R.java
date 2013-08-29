@@ -27,9 +27,9 @@ public final class R {
         public static final int btn_crear=0x7f070007;
         public static final int btn_index=0x7f070001;
         public static final int btn_new=0x7f070003;
-        public static final int header=0x7f070002;
         public static final int post_rating=0x7f070008;
-        public static final int post_table=0x7f070000;
+        public static final int post_table=0x7f070002;
+        public static final int scroll=0x7f070000;
         public static final int txt_author=0x7f070004;
         public static final int txt_content=0x7f070006;
         public static final int txt_title=0x7f070005;
@@ -42,6 +42,7 @@ public final class R {
     public static final class string {
         public static final int action_settings=0x7f050002;
         public static final int app_name=0x7f050000;
+        public static final int get_all_post=0x7f050009;
         public static final int hello_world=0x7f050003;
         public static final int new_post=0x7f050004;
         public static final int post_author=0x7f050005;
