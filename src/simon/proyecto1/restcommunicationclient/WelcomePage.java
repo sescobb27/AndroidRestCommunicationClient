@@ -6,6 +6,8 @@ import android.os.Bundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import simon.proyecto1.restcommunicationclient.controllers.IndexActivity;
+
 public class WelcomePage extends Activity {
 
     @Override

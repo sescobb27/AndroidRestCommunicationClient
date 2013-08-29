@@ -26,11 +26,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="simon.proyecto1.restcommunicationclient.IndexActivity"
+            android:name="simon.proyecto1.restcommunicationclient.controllers.IndexActivity"
             android:label="@string/title_activity_index" >
         </activity>
         <activity
-            android:name="simon.proyecto1.restcommunicationclient.PostActivity"
+            android:name="simon.proyecto1.restcommunicationclient.controllers.PostActivity"
             android:label="@string/new_post" >
         </activity>
     </application>
