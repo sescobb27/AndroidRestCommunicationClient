@@ -5,7 +5,12 @@ import android.content.Context;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
-
+/**
+ * 
+ * @author simon
+ *	clase para ir añadiendole un OnClickListener a cada TableRow que
+ *	se va agregando dinamicamente
+ */
 public class DinamicListener implements OnClickListener{
 
 	private Post post;

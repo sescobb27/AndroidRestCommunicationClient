@@ -26,6 +26,11 @@ import simon.proyecto1.restcommunicationclient.models.Post;
 
 import java.util.TreeSet;
 
+/**
+ * 
+ * @author simon
+ *	controlador de la vista index, y sirve para consumir el service via GET y JSON, accediento a todos los post
+ */
 public class IndexActivity extends Activity implements View.OnClickListener, ServiceSuscriptor{
 
     private ConnectionDetector internet_detector;
@@ -35,7 +40,6 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
 
     private Button             btn_index, btn_new;
     private TableLayout        post_table;
-    // private ScrollView scroller;
     private TableRow           tableRow;
     private TextView id, title;
 
@@ -57,7 +61,6 @@ public class IndexActivity extends Activity implements View.OnClickListener, Ser
         btn_new = (Button) findViewById( R.id.btn_new );
         btn_new.setOnClickListener( this );
         post_table = (TableLayout) findViewById( R.id.post_table );
-        // scroller = (ScrollView) findViewById(R.id.scroll);
         posts = new TreeSet<Post>(  );
     }
 

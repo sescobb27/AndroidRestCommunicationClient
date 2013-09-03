@@ -32,8 +32,8 @@ public class ServiceConnection/* extends AsyncTask<Void, Integer, Long>*/{
     private final String UPDATE_URL  = "/post/:id.json";
     private final String CREATE_URL  = "/posts.json";
     private final String DESTROY_URL = "/posts/:id.json";
-    private final String SERVER_URL  = "http://192.168.1.2";
-    //private final String SERVER_URL  = "http://10.0.44.84";
+    //private final String SERVER_URL  = "http://192.168.1.2";
+    private final String SERVER_URL  = "http://10.0.41.151";
     private final String PORT = ":3000";
     private       StringBuilder REQUEST_URL;
 
